@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -108,6 +109,14 @@ fun WelcomeScreen(onNextClick: () -> Unit) {
                 center = Offset(canvasWidth * 0.1f, canvasHeight * 0.8f)
             )
         }
+
+        ServerSettingsButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+                .alpha(alpha.value),
+            color = Color.White
+        )
 
         Column(
             modifier = Modifier

@@ -78,7 +78,7 @@ dependencies {
 // Coroutines (downgraded)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-// Coil (Image Picker - latest coil3 needs kotlin 2.1+, downgrade too)
+// Coil
     implementation("io.coil-kt:coil-compose:2.4.0")
 
 // Navigation Compose
@@ -86,5 +86,7 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-core:1.6.1")
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
+    implementation("androidx.browser:browser:1.8.0")
 
 }

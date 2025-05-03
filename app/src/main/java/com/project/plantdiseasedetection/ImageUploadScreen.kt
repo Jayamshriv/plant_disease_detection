@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.annotation.RequiresApi
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -102,7 +103,7 @@ fun ImageUploadScreen() {
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal= 16.dp)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -319,13 +320,32 @@ fun ImageUploadScreen() {
                                         style = MaterialTheme.typography.bodyMedium
                                     )
 
+
+                                    if (result.supplement.image_url != null) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        AsyncImage(
+                                            model = result.supplement.image_url,
+                                            contentDescription = "Supplement Image",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .clip(RoundedCornerShape(12.dp))
+                                        )
+                                    }
+
                                     // Add Buy Link if available
                                     if (result.supplement.buy_link != null) {
                                         Spacer(modifier = Modifier.height(8.dp))
                                         OutlinedButton(
                                             onClick = {
-                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.supplement.buy_link))
-                                                context.startActivity(intent)
+                                                val intent = CustomTabsIntent.Builder()
+                                                    .setShowTitle(true)
+                                                    .setUrlBarHidingEnabled(true)
+                                                    .build()
+                                                    .launchUrl(context, Uri.parse(result.supplement.buy_link))
+//                                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.supplement.buy_link))
+//                                                context.startActivity(intent)
                                             },
                                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF388E3C)),
                                             border = BorderStroke(1.dp, Color(0xFF66BB6A)),
@@ -410,6 +430,7 @@ fun ImageUploadScreen() {
     }
 }
 
+
 suspend fun uploadImageToServer(context: Context, uri: Uri): PredictionResponse? {
     return withContext(Dispatchers.IO) {
         try {
@@ -424,7 +445,7 @@ suspend fun uploadImageToServer(context: Context, uri: Uri): PredictionResponse?
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
 
-            val response = RetrofitInstance.api.uploadImage(body)
+            val response = RetrofitInstance.getApi(context).uploadImage(body)
             Log.d("Response", response.body()?.toString() ?: "Response body is null")
             if (response.isSuccessful) {
                 response.body()
