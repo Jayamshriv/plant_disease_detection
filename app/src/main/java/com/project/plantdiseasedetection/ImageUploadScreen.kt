@@ -183,16 +183,16 @@ fun ImageUploadScreen() {
                     Text("Gallery")
                 }
 
-                Button(
-                    onClick = { takePictureLauncher.launch() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier.weight(1f).padding(start = 8.dp)
-                ) {
-                    Icon(Icons.Outlined.PhotoCamera, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Camera", color = Color.White)
-                }
+//                Button(
+//                    onClick = { takePictureLauncher.launch() },
+//                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),
+//                    shape = RoundedCornerShape(50),
+//                    modifier = Modifier.weight(1f).padding(start = 8.dp)
+//                ) {
+//                    Icon(Icons.Outlined.PhotoCamera, contentDescription = null)
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Text("Camera", color = Color.White)
+//                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -431,16 +431,26 @@ fun ImageUploadScreen() {
 }
 
 
+fun createTempFileFromUri(context: Context, uri: Uri): File? {
+    return try {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+        val tempFile = File.createTempFile("upload_", ".jpg", context.cacheDir)
+        val outputStream = FileOutputStream(tempFile)
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        tempFile
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+
 suspend fun uploadImageToServer(context: Context, uri: Uri): PredictionResponse? {
     return withContext(Dispatchers.IO) {
         try {
-            val contentResolver = context.contentResolver
-            val inputStream = contentResolver.openInputStream(uri)
-            val file = File(context.cacheDir, "upload.jpg")
-            val outputStream = FileOutputStream(file)
-            inputStream?.copyTo(outputStream)
-            outputStream.close()
-            inputStream?.close()
+            val file = createTempFileFromUri(context, uri)!!
 
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
@@ -457,4 +467,7 @@ suspend fun uploadImageToServer(context: Context, uri: Uri): PredictionResponse?
             null
         }
     }
+
 }
+
+
